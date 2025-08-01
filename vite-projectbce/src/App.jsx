@@ -14,7 +14,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import FetchMedicines from "./medicine/fetchmedicines/FetchMedicine";
 import Donordashboard from "./medicine/Dashboards/Donordashboard";
 import Needydashboard from "./medicine/Dashboards/Needydashboard";
-// import LoginSignupBtn from "./components/loginsignupbtn";
 import MainPage from './components/MainPage.jsx';
 import LoginSignupBtn from './components/loginsignupbtn.jsx';
 export default function App() {
