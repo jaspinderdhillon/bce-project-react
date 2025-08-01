@@ -1,0 +1,1 @@
+export const serverl_url = "http://localhost:7176";
