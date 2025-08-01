@@ -29,7 +29,7 @@ export default function Signup() {
       setMe(response.data.msg);
       alert(response.data.msg + "\n\nRedirecting to homepage...");
       setTimeout(() => {
-        navigate("/")
+        navg("/")
       }, 2000);
     } catch (err) {
       setMessage(err.response?.data?.msg || "Signup failed");
