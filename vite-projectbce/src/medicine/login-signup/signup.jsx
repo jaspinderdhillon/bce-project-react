@@ -20,18 +20,17 @@ export default function Signup() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const navigate = useNavigate();
-
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
       const response = await axios.post(serverl_url+"/signup", formData);
-      setMe(response.data.msg);
+      setMessage(response.data.msg);
       alert(response.data.msg + "\n\nRedirecting to homepage...");
       setTimeout(() => {
         navg("/")
       }, 2000);
     } catch (err) {
+      // alert(err.message)
       setMessage(err.response?.data?.msg || "Signup failed");
     }
   };

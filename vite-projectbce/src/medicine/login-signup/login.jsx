@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import axios from "axios";
 import { serverl_url } from "../../configs/url";
 import { useNavigate } from "react-router-dom";
-import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 export default function Login({loginstatusupdate}) {
   const [email, setEmail] = useState("");
   const [pwd, setPwd] = useState("");
