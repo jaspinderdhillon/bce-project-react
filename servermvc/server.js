@@ -16,6 +16,9 @@ const needyrouter = require("./routes/needyrouter");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 dotenv.config();
+dotenv.config();
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD ? "Loaded ✅" : "❌ Missing");
 
 
 //======MODELS======
@@ -26,14 +29,15 @@ var signupmodel = require("./models/signupmodel").signupmodel();
 //=========nodemailer========
 const nodemailer = require("nodemailer");
 const transporter = nodemailer.createTransport({
-  secure: true,
   host: "smtp.gmail.com",
   port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD
-  }
+    pass: process.env.EMAIL_PASSWORD,
+  },
 });
+
 function sendmail(to, sub, msg) {
   transporter.sendMail({
     to: to,
@@ -95,7 +99,8 @@ app.post("/signup", async (req, res) => {
     const newUser = new signupmodel({ name, email, pwd, user });
     await newUser.save();
     console.log(newUser);
-    sendmail(email, "Signup successful", "You have successfully signed up with Medicine Bank", "Your user type is " + user);
+    // alert("sending data to nodemailer");
+    sendmail(email, "Signup successful\n\n You have successfully signed up with Medicine Bank\n\n" ,"Your user type is " + user);
     res.status(200).json({ msg: "Signup successful" });
     // window.location.reload();
   } catch (error) {
@@ -107,8 +112,10 @@ app.post("/signup", async (req, res) => {
 // ✅ Login Route         
 // ===============================
 app.post("/login", async (req, res) => {
+  console.log("login called");
   try {
     const { email, pwd } = req.body;
+    console.log("Login request received for email:", email);
 
     const user = await signupmodel.findOne({ email });
 
@@ -119,7 +126,10 @@ app.post("/login", async (req, res) => {
     if (user.pwd !== pwd) {
       return res.status(401).json({ msg: "Incorrect password" });
     }
-    sendmail(email, "Login successful", "You have successfully logged in with Medicine Bank", "Welcome back " + user.name);
+    console.log("User found:", user);
+    console.log("sending data to nodemailer");
+    // sendmail(email, "Login successful\n\n You have successfully logged in with Medicine Bank\n\n" , "Welcome back " + user.name);
+    sendmail(email, "Login successful\n\n You have successfully logged in with Medicine Bank\n\n" ,  "Welcome back " + user.name);
     const token = jwt.sign({ email: user.email }, process.env.SEC_KEY, { expiresIn: "1h" });
 
     res.status(200).json({

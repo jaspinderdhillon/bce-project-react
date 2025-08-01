@@ -27,14 +27,14 @@ export default function Login({loginstatusupdate}) {
       console.log("role is "+response.data.user)
       localStorage.setItem("token", response.data.token);
       console.log("token is "+response.data.token)
-      setTimeout(() => {
-        alert("navigating you to your dashboard"+response.data.user);
-        if(response.data.user=="donor"){
-          navg("/donor/donordashboard");
-        }else{
-          navg("/needy/needydashboard");
-        }        
-      }, 2000);
+      // setTimeout(() => {
+      //   alert("navigating you to your dashboard"+response.data.user);
+      //   if(response.data.user=="donor"){
+      //     navg("/donor/donordashboard");
+      //   }else{
+      //     navg("/needy/needydashboard");
+      //   }        
+      // }, 2000);
     } catch (err) {
       setMessage(err.response?.data?.msg || "Login failed");
     }
