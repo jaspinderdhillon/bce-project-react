@@ -194,16 +194,17 @@ export default function Signup() {
           className={
             `w-full py-2 rounded-md font-semibold transition duration-300 mt-2 ` +
             (darkMode
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-blue-600 text-white hover:bg-blue-700")
+              ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 active:shadow-sm"
+              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 active:shadow-sm")
           }
+          style={{ cursor: "pointer" }}
         >
           Sign Up
         </button>
         {/* Response Message */}
         {message && (
           <p className={
-            `text-center text-sm font-medium mt-2 ` +
+            `text-center text-sm font-medium mt-2 pointer` +
             (darkMode ? "text-blue-200" : "text-blue-700")
           }>
             {message}

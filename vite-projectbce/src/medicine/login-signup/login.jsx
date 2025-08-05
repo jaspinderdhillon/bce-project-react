@@ -147,9 +147,10 @@ export default function Login({loginstatusupdate}) {
           className={
             `w-full py-2 rounded-lg font-semibold transition duration-200 mt-2 ` +
             (darkMode
-              ? "bg-blue-600 text-white hover:bg-blue-700"
-              : "bg-blue-600 text-white hover:bg-blue-700")
+              ? "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 active:shadow-sm"
+              : "bg-blue-600 text-white hover:bg-blue-700 active:scale-95 active:shadow-sm")
           }
+          style={{ cursor: "pointer" }}
         >
           Sign In
         </button>

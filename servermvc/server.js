@@ -1,33 +1,36 @@
+// Required modules
 let express = require("express");
 let mongoose = require("mongoose");
 let app = express();
-var fileuploader = require("express-fileupload");
-app.use(express.json()); // for JSON data
-app.use(express.static("public")); // to serve static files
-app.use(express.static("uploads")); // to serve uploaded files
-app.use(express.urlencoded({ extended: true })); // for URL-encoded form data
-app.use(fileuploader()); // file upload support
+let fileuploader = require("express-fileupload");
 let config = require("./config/configuration");
 let cors = require("cors");
-app.use(cors()); // to allow cross-origin requests
-let donorrouter = require("./routes/donorrouter");
-const needyrouter = require("./routes/needyrouter");
-// const medicinemanagerrouter = require("./routes/medicinemanagerrouter");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
+const nodemailer = require("nodemailer");
+
+// Load environment variables
 dotenv.config();
-dotenv.config();
+
 console.log("EMAIL_USER:", process.env.EMAIL_USER);
 console.log("EMAIL_PASSWORD:", process.env.EMAIL_PASSWORD ? "Loaded ✅" : "❌ Missing");
 
+// Middlewares
+app.use(express.json());
+app.use(express.static("public"));
+app.use(express.static("uploads"));
+app.use(express.urlencoded({ extended: true }));
+app.use(fileuploader());
+app.use(cors());
 
-//======MODELS======
-var signupmodel = require("./models/signupmodel").signupmodel();
-// var Usermodel = signupmodel; // reference to user model
+// Routers
+let donorrouter = require("./routes/donorrouter");
+const needyrouter = require("./routes/needyrouter");
 
+// Models
+let signupmodel = require("./models/signupmodel").signupmodel();
 
-//=========nodemailer========
-const nodemailer = require("nodemailer");
+// Email configuration
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -40,48 +43,33 @@ const transporter = nodemailer.createTransport({
 
 function sendmail(to, sub, msg) {
   transporter.sendMail({
+    from: process.env.EMAIL_USER,
     to: to,
     subject: sub,
-    html: msg
+    html: msg,
   }, (err, data) => {
     if (err) {
-      console.log(err);
+      console.log("Email error:", err);
     } else {
       console.log("Email sent successfully");
     }
-  })
-
+  });
 }
-// Start the server
+
+// MongoDB connection
+mongoose.connect(config.mongodbatlasurl)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.log("Error connecting to MongoDB:", err.message));
+
+// Server listener
 app.listen(7176, () => {
   console.log("Server is running on port 7176");
 });
 
-//======CONFIGURATION======
-var mongodbatlasurl = config.mongodbatlasurl;
-mongoose
-  .connect(mongodbatlasurl)
-  .then(() => {
-    console.log("Connected to MongoDB");
-  })
-  .catch((err) => {
-    console.log("Error connecting to MongoDB: " + err.message);
-  });
-
-
-// app.use((req, res, next) => {
-
-//   console.log(req.headers)
-//   next();
-
-// })
-
-
-
+// Mount routers
 app.use("/donor", donorrouter);
 app.use("/needy", needyrouter);
 app.use("/gemini", require("./routes/geminirouter"));
-// app.use("/gemini", geminirouter); // ✅ CORRECT
 
 // ===============================
 // ✅ Signup Route
@@ -89,8 +77,8 @@ app.use("/gemini", require("./routes/geminirouter"));
 app.post("/signup", async (req, res) => {
   try {
     const { name, email, pwd, user } = req.body;
-
     console.log(req.body);
+
     const existing = await signupmodel.findOne({ email });
     if (existing) {
       return res.status(400).json({ msg: "Email already registered" });
@@ -99,17 +87,21 @@ app.post("/signup", async (req, res) => {
     const newUser = new signupmodel({ name, email, pwd, user });
     await newUser.save();
     console.log(newUser);
-    // alert("sending data to nodemailer");
-    sendmail(email, "Signup successful\n\n You have successfully signed up with Medicine Bank\n\n" ,"Your user type is " + user);
+
+    sendmail(
+      email,
+      "Signup successful\n\n You have successfully signed up with Medicine Bank\n\n",
+      "Your user type is " + user
+    );
+
     res.status(200).json({ msg: "Signup successful" });
-    // window.location.reload();
   } catch (error) {
     res.status(500).json({ msg: "Server error", error: error.message });
   }
 });
 
 // ===============================
-// ✅ Login Route         
+// ✅ Login Route
 // ===============================
 app.post("/login", async (req, res) => {
   console.log("login called");
@@ -126,11 +118,21 @@ app.post("/login", async (req, res) => {
     if (user.pwd !== pwd) {
       return res.status(401).json({ msg: "Incorrect password" });
     }
+
     console.log("User found:", user);
     console.log("sending data to nodemailer");
-    // sendmail(email, "Login successful\n\n You have successfully logged in with Medicine Bank\n\n" , "Welcome back " + user.name);
-    sendmail(email, "Login successful\n\n You have successfully logged in with Medicine Bank\n\n" ,  "Welcome back " + user.name);
-    const token = jwt.sign({ email: user.email }, process.env.SEC_KEY, { expiresIn: "1h" });
+
+    sendmail(
+      email,
+      "Login successful\n\n You have successfully logged in with Medicine Bank\n\n",
+      "Welcome back " + user.name
+    );
+
+    const token = jwt.sign(
+      { email: user.email },
+      process.env.SEC_KEY,
+      { expiresIn: "1h" }
+    );
 
     res.status(200).json({
       msg: "Login successful",
